@@ -636,12 +636,125 @@ function addGraffitiImage2() {
 }
 
 
+
+
+function initDimitrisNameAnimation() {
+  var holder = document.getElementById('three-container');
+  if (!holder || !window.THREE) return;
+
+  var dmWidth = holder.clientWidth || 360;
+  var dmHeight = holder.clientHeight || 120;
+
+  var dmRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  dmRenderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  dmRenderer.setSize(dmWidth, dmHeight);
+  holder.appendChild(dmRenderer.domElement);
+
+  var dmScene = new THREE.Scene();
+  var dmCamera = new THREE.PerspectiveCamera(45, dmWidth / dmHeight, 1, 1000);
+  dmCamera.position.z = 260;
+
+  var textCanvas = document.createElement('canvas');
+  textCanvas.width = 1024;
+  textCanvas.height = 256;
+
+  var ctx = textCanvas.getContext('2d');
+  ctx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+  ctx.font = 'bold 105px Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // White glow only. The letters themselves are red, not black.
+  ctx.shadowColor = 'rgba(255, 0, 0, 0.95)';
+  ctx.shadowBlur = 30;
+  ctx.lineWidth = 10;
+  ctx.strokeStyle = '#ffffff';
+  ctx.strokeText('[<=||DM||=>]', textCanvas.width / 2, textCanvas.height / 2);
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#ff0000';
+  ctx.fillText('[<=||DM||=>]', textCanvas.width / 2, textCanvas.height / 2);
+
+  var texture = new THREE.Texture(textCanvas);
+  texture.needsUpdate = true;
+
+  var geometry = new THREE.PlaneGeometry(330, 85);
+  var material = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    side: THREE.DoubleSide
+  });
+
+  var dmName = new THREE.Mesh(geometry, material);
+  dmScene.add(dmName);
+
+  var isDragging = false;
+  var previousX = 0;
+  var manualRotation = 0;
+
+  holder.addEventListener('mousedown', function (event) {
+    isDragging = true;
+    previousX = event.clientX;
+  });
+
+  window.addEventListener('mouseup', function () {
+    isDragging = false;
+  });
+
+  window.addEventListener('mousemove', function (event) {
+    if (!isDragging) return;
+    var deltaX = event.clientX - previousX;
+    previousX = event.clientX;
+    manualRotation += deltaX * 0.01;
+  });
+
+  holder.addEventListener('touchstart', function (event) {
+    if (!event.touches.length) return;
+    isDragging = true;
+    previousX = event.touches[0].clientX;
+  }, { passive: true });
+
+  window.addEventListener('touchend', function () {
+    isDragging = false;
+  });
+
+  window.addEventListener('touchmove', function (event) {
+    if (!isDragging || !event.touches.length) return;
+    var deltaX = event.touches[0].clientX - previousX;
+    previousX = event.touches[0].clientX;
+    manualRotation += deltaX * 0.01;
+  }, { passive: true });
+
+  function resizeDimitrisName() {
+    dmWidth = holder.clientWidth || 360;
+    dmHeight = holder.clientHeight || 120;
+    dmCamera.aspect = dmWidth / dmHeight;
+    dmCamera.updateProjectionMatrix();
+    dmRenderer.setSize(dmWidth, dmHeight);
+  }
+
+  window.addEventListener('resize', resizeDimitrisName, false);
+
+  function animateDimitrisName() {
+    requestAnimationFrame(animateDimitrisName);
+    var time = Date.now() * 0.001;
+    dmName.rotation.y = manualRotation + Math.sin(time * 1.6) * 0.35;
+    dmName.rotation.z = Math.sin(time * 1.1) * 0.04;
+    dmName.scale.setScalar(1 + Math.sin(time * 2.2) * 0.04);
+    dmRenderer.render(dmScene, dmCamera);
+  }
+
+  animateDimitrisName();
+}
+
+
     // INITIALIZE EVERYTHING
     init();
     createLights();
     createFloor();
     addGraffitiImage();
     addGraffitiImage2();
+    initDimitrisNameAnimation();
 
     createBirdsAndSun();
     loop();
