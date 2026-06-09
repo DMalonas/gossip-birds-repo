@@ -15,7 +15,12 @@
       overflow: hidden;
     }
     
-    
+    #contributor-name {
+    position: fixed;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+  }
 
     #sun-info {
       position: absolute;
