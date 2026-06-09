@@ -54,3 +54,15 @@
     #click-counter.show {
       opacity: 1;
     }
+
+#title {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  color: black;
+  font-size: 4em;
+  font-family: sans-serif;
+  z-index: 10;
+  pointer-events: none;
+  text-shadow: 0 0 20px rgba(255,255,255,0.8)
+}
