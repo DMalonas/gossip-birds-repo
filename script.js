@@ -60,7 +60,7 @@
           object.receiveShadow = true;
         }
       });
-    }
+    }git
 
     Sun.prototype.explode = function() {
       var sunPos = this.threegroup.position.clone();
